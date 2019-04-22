@@ -1,0 +1,11 @@
+[package]
+name = "rustboost"
+version = "0.1.0"
+authors = ["MoonL1ght <ixav1@icloud.com>"]
+
+[dependencies]
+clap = "2.32.0"
+rand = "0.5.5"
+num = "0.2.0"
+
+
