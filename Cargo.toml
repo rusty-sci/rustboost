@@ -2,6 +2,7 @@
 name = "rustboost"
 version = "0.1.0"
 authors = ["MoonL1ght <ixav1@icloud.com>"]
+edition = "2018"
 
 [dependencies]
 clap = "2.32.0"
