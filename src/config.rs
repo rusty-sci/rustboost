@@ -1,26 +1,26 @@
-use std::path::Path;
+// use std::path::Path;
 
-pub const DEFAULT_DTYPE: &'static str = "float32";
+// pub const DEFAULT_DTYPE: &'static str = "float32";
 pub const DEFAULT_TASK: &'static str = "train";
 pub const DEFAULT_OBJECTIVE: &'static str = "classif:tree";
 
-#[derive(Debug)]
-pub enum DType {
-  Float32,
-  Float64
-}
+// #[derive(Debug)]
+// pub enum DType {
+//   Float32,
+//   Float64
+// }
 
-impl DType {
+// impl DType {
 
-  pub fn new(dtype: &str) -> Self {
-    match dtype {
-      "float32" => DType::Float32,
-      "float64" => DType::Float64,
-      _ => panic!("Wrong dtype argument.")
-    }
-  }
+//   pub fn new(dtype: &str) -> Self {
+//     match dtype {
+//       "float32" => DType::Float32,
+//       "float64" => DType::Float64,
+//       _ => panic!("Wrong dtype argument.")
+//     }
+//   }
 
-}
+// }
 
 #[derive(Debug)]
 pub enum Task {
@@ -77,20 +77,20 @@ impl LearningTask {
 }
 
 #[derive(Debug)]
-pub struct Config<'c> {
-  pub path: &'c Path,
-  pub dtype: DType,
+pub struct Config {
+  // pub path: &'c Path,
+  // pub dtype: DType,
   pub task: Task,
   pub learning_task: LearningTask,
   pub objective: Objective
 }
 
-impl<'c> Config<'c> {
+impl Config {
 
-  pub fn default(path: &'c Path) -> Self {
+  pub fn default() -> Self {
     Config {
-      path: path,
-      dtype: DType::new(DEFAULT_DTYPE),
+      // path: path,
+      // dtype: DType::new(DEFAULT_DTYPE),
       task: Task::new(DEFAULT_TASK),
       learning_task: LearningTask::new(DEFAULT_OBJECTIVE
         .split(":").collect::<Vec<&str>>()[0]),
@@ -99,12 +99,12 @@ impl<'c> Config<'c> {
     }
   }
 
-  pub fn dtype(self, dtype: &str) -> Self {
-    Config {
-      dtype: DType::new(dtype),
-      ..self
-    }
-  }
+  // pub fn dtype(self, dtype: &str) -> Self {
+  //   Config {
+  //     dtype: DType::new(dtype),
+  //     ..self
+  //   }
+  // }
 
   pub fn task(self, task: &str) -> Self {
     Config {
@@ -115,7 +115,8 @@ impl<'c> Config<'c> {
 
   pub fn objective(self, objective: &str) -> Self {
     let objectives = objective.split(":").collect::<Vec<&str>>();
-    println!("{}", objectives[0]);
+    // debug!()
+    // println!("{}", objectives[0]);
     Config {
       learning_task: LearningTask::new(objectives[0]),
       objective: Objective::new(objectives[1]),
