@@ -7,14 +7,14 @@ use super::super::types::*;
 
 const EPS: f64 = 10_000_0000f64;
 
-fn gen_data(N: usize, M: usize) -> Vec<Vec<dtype>> {
+fn gen_data(n: usize, m: usize) -> Vec<Vec<dtype>> {
   const MIN: dtype = 10.;
   const MAX: dtype = 20.;
   let mut data: Vec<Vec<dtype>> = Vec::new();
   let mut rng = rand::thread_rng();
-  for _ in 0..N {
+  for _ in 0..n {
     let mut sample: Vec<dtype> = Vec::new();
-    for _ in 0..M {
+    for _ in 0..m {
       sample.push(rng.gen_range(MIN, MAX))
     }
     data.push(sample);
@@ -50,7 +50,7 @@ fn test_mse() {
                   // vec![8., 5.4, 3.9, 1.7, 0.4]];
   let data: Vec<Vec<dtype>> = gen_data(100, 4);
   let mse_test = mse(&data);
-  let mse_res = MSE::new(&data, 0).loss;
+  let mse_res = MSE::new(&data, 0).score;
   almost_eq(mse_test, mse_res, EPS);
 }
 
@@ -59,12 +59,12 @@ fn test_sliding_mse() {
   let data: Vec<Vec<dtype>> = gen_data(100, 4);
   let mse_test = mse(&data);
   let mut mse_res = MSE::new(&data, 0);
-  almost_eq(mse_test, mse_res.loss, EPS);
+  almost_eq(mse_test, mse_res.score, EPS);
   for split_idx in 1..data.len() {
     let left_mse_test = mse(&data[0..split_idx]);
     let right_mse_test = mse(&data[split_idx..data.len()]);
     let mse_test = left_mse_test + right_mse_test;
     mse_res.update(&data, split_idx);
-    almost_eq(mse_test, mse_res.loss, EPS);
+    almost_eq(mse_test, mse_res.score, EPS);
   }
 }

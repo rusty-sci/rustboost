@@ -2,7 +2,9 @@
 
 // pub const DEFAULT_DTYPE: &'static str = "float32";
 pub const DEFAULT_TASK: &'static str = "train";
-pub const DEFAULT_OBJECTIVE: &'static str = "classif:tree";
+pub const DEFAULT_LT: &'static str = "regression";
+pub const DEFAULT_MODEL: &'static str = "tree";
+// pub const DEFAULT_OBJECTIVE: &'static str = "classif:tree";
 
 // #[derive(Debug)]
 // pub enum DType {
@@ -31,8 +33,8 @@ pub enum Task {
 
 impl Task {
 
-  pub fn new(dtype: &str) -> Self {
-    match dtype {
+  pub fn new(task: &str) -> Self {
+    match task {
       "train" => Task::Train,
       "pred" => Task::Pred,
       "val" => Task::Val,
@@ -43,16 +45,16 @@ impl Task {
 }
 
 #[derive(Debug)]
-pub enum Objective {
+pub enum Model {
   Tree
 }
 
-impl Objective {
+impl Model {
 
-  pub fn new(dtype: &str) -> Self {
-    match dtype {
-      "tree" => Objective::Tree,
-      _ => panic!("Wrong objective argument.")
+  pub fn new(model: &str) -> Self {
+    match model {
+      "tree" => Model::Tree,
+      _ => panic!("Wrong model argument.")
     }
   }
 
@@ -66,10 +68,10 @@ pub enum LearningTask {
 
 impl LearningTask {
 
-  pub fn new(dtype: &str) -> Self {
-    match dtype {
-      "reg" => LearningTask::Regression,
-      "classif" => LearningTask::Classification,
+  pub fn new(lt: &str) -> Self {
+    match lt {
+      "regression" => LearningTask::Regression,
+      "classification" => LearningTask::Classification,
       _ => panic!("Wrong objective argument.")
     }
   }
@@ -78,33 +80,20 @@ impl LearningTask {
 
 #[derive(Debug)]
 pub struct Config {
-  // pub path: &'c Path,
-  // pub dtype: DType,
   pub task: Task,
   pub learning_task: LearningTask,
-  pub objective: Objective
+  pub model: Model
 }
 
 impl Config {
 
   pub fn default() -> Self {
     Config {
-      // path: path,
-      // dtype: DType::new(DEFAULT_DTYPE),
       task: Task::new(DEFAULT_TASK),
-      learning_task: LearningTask::new(DEFAULT_OBJECTIVE
-        .split(":").collect::<Vec<&str>>()[0]),
-      objective: Objective::new(DEFAULT_OBJECTIVE
-        .split(":").collect::<Vec<&str>>()[1])
+      learning_task: LearningTask::new(DEFAULT_LT),
+      model: Model::new(DEFAULT_MODEL)
     }
   }
-
-  // pub fn dtype(self, dtype: &str) -> Self {
-  //   Config {
-  //     dtype: DType::new(dtype),
-  //     ..self
-  //   }
-  // }
 
   pub fn task(self, task: &str) -> Self {
     Config {
@@ -113,13 +102,16 @@ impl Config {
     }
   }
 
-  pub fn objective(self, objective: &str) -> Self {
-    let objectives = objective.split(":").collect::<Vec<&str>>();
-    // debug!()
-    // println!("{}", objectives[0]);
+  pub fn model(self, model: &str) -> Self {
     Config {
-      learning_task: LearningTask::new(objectives[0]),
-      objective: Objective::new(objectives[1]),
+      model: Model::new(model),
+      ..self
+    }
+  }
+
+  pub fn learning_task(self, learning_task: &str) -> Self {
+    Config {
+      learning_task: LearningTask::new(learning_task),
       ..self
     }
   }

@@ -4,7 +4,7 @@
 // extern crate num;
 
 use std::f64::MAX;
-use std::collections::HashSet;
+// use std::collections::HashSet;
 // use std::str::FromStr;
 // use std::fmt::Debug;
 use std::cmp::Ordering;
@@ -25,6 +25,12 @@ impl Tree {
       .depth(0);
     let data_dim: usize = self.dataset.borrow().data_dim;
 
+    let data = &mut (*self.dataset.borrow_mut().data)[..];
+    self.find_best_split(&mut root, data, data_dim);
+
+
+
+
     match self.learning_task {
       LearningTask::Classification => {
         // Compute "slow" score (error), at this time Gini Impurity score.
@@ -39,10 +45,10 @@ impl Tree {
         // self.grow_cart(&mut root, data, data_dim, number_of_classes);
       },
       LearningTask::Regression => {
-        let mse = MSE::new(&self.dataset.borrow().data, 0);
-        debug!("{:#?}", mse);
-        let data = &mut self.dataset.borrow_mut().data[..];
-        self.grow_tree(&mut root, data, data_dim);
+        // let mse = MSE::new(&self.dataset.borrow().data, 0);
+        // debug!("{:#?}", mse);
+        // let data = &mut self.dataset.borrow_mut().data[..];
+        // self.grow_tree(&mut root, data, data_dim);
         // root.score = self.mse(&self.dataset.borrow().data).to_f64().unwrap() as ScoreType;
         // let data = &mut (*self.dataset.borrow_mut().data)[..];
         // self.grow_cart_reg(&mut root, data, data_dim);
@@ -51,8 +57,75 @@ impl Tree {
     debug!("{:#?}", root);
   }
 
-  fn grow_tree(&self, node: &mut Node, data: &mut [Vec<dtype>], data_dim: usize) {
+  fn find_best_split(&self, node: &mut Node, data: &mut [Vec<dtype>], data_dim: usize) {
+    let mut score: dtype = MAX;
+    let mut best_f_idx: usize = 0;
+    let mut best_s_idx: usize = 0;
+    let mut best_loss: Option<MSE> = None;
+    for feature_idx in 1..data_dim {
+      // sort data by feature,
+      // 0 index cresponds to the target
+      data.sort_unstable_by(|a, b| {
+        match b[feature_idx].partial_cmp(&a[feature_idx]).unwrap() {
+          Ordering::Equal => b[0].partial_cmp(&a[0]).unwrap(),
+          other => other
+        }
+      });
+      let new_loss = MSE::new(data, 0);
+      if node.loss.is_some() {
+        assert_eq!(node.score, new_loss.score,
+          "new score and prev score must be equal.");
+      }
+      node.score = new_loss.score;
+      node.loss = Some(new_loss);
+      
+      // assert_eq!(loss.loss, new_loss.loss,
+      //   "new score and prev score must be equal.");
+      for split_idx in 1..data.len() {
+        node.loss.as_mut().unwrap().update(data, split_idx);
+        let new_score = node.loss.unwrap().score;
+        // println!("{:?}", node.loss.unwrap());
+        // node.loss.unwrap().compute(split_idx);
+        if new_score < score {
+          score = new_score;
+          best_f_idx = feature_idx;
+          best_s_idx = split_idx;
+          best_loss = Some(node.loss.unwrap());
+        }
+      }
+    }
+    node.loss = best_loss;
+    println!("{:?}", score);
+    println!("{:?}", node.loss.unwrap().score);
+    assert_eq!(score, node.loss.unwrap().score);
+    println!("{:?}", score);
+    println!("{:?}", node.loss.unwrap().score);
+  }
 
+
+
+  fn grow_tree(&self, node: &mut Node, data: &mut [Vec<dtype>], data_dim: usize) {
+    // let mut score: dtype = MAX;
+
+    // let mut lchild: Node = Node::new(NodeType::Decision)
+    //   .depth(node.depth + 1);
+    // let mut rchild: Node = Node::new(NodeType::Decision)
+    //   .depth(node.depth + 1);
+
+    // for feature_idx in 1..data_dim {
+    //   // sort data by feature, 0 index cresponds to
+    //   // target
+    //   data.sort_unstable_by(|a, b| {
+    //     match b[feature_idx].partial_cmp(&a[feature_idx]).unwrap() {
+    //       Ordering::Equal => b[0].partial_cmp(&a[0]).unwrap(),
+    //       other => other
+    //     }
+    //   });
+
+    //   for split_idx in 1..data.len() {
+
+    //   }
+    // }
   }
 
   // fn grow_cart_reg(&self, node: &mut Node<DType>, data: &mut [(TargetType, Vec<DType>)],

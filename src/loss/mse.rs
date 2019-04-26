@@ -2,8 +2,9 @@ use super::super::types::*;
 
 /// MSE for binary tree regression.
 #[derive(Debug)]
+#[derive(Copy, Clone)]
 pub struct MSE {
-  pub loss: dtype,
+  pub score: dtype,
   data_len: usize,
   left_coefs: (dtype, dtype),
   right_coefs: (dtype, dtype)
@@ -11,31 +12,27 @@ pub struct MSE {
 
 impl MSE {
 
-  pub fn new(data: &Vec<Vec<dtype>>, split_idx: usize) -> Self {
+  pub fn new(data: &[Vec<dtype>], split_idx: usize) -> Self {
     let mut mse = Self {
-      loss: 0., data_len: data.len(),
+      score: 0., data_len: data.len(),
       left_coefs: (0., 0.),
       right_coefs: (0., 0.)
     };
     MSE::init_coefs(&mut mse, data, split_idx);
-    mse.loss = mse.mse(split_idx);
+    mse.score = mse.compute(split_idx);
     mse
   }
 
-  pub fn init_coefs(&mut self, data: &Vec<Vec<dtype>>, split_idx: usize) {
-    self.left_coefs = MSE::coefs(&data[0..split_idx]);
-    self.right_coefs = MSE::coefs(&data[split_idx..self.data_len]);
-  }
-
   /// Updates left and right coefs for fast mse computation.
-  pub fn update(&mut self, data: &Vec<Vec<dtype>>, split_idx: usize) {
+  /// And recomputes full mse.
+  pub fn update(&mut self, data: &[Vec<dtype>], split_idx: usize) {
     MSE::update_coefs(&mut self.left_coefs, data, split_idx, |a, b| {a + b});
     MSE::update_coefs(&mut self.right_coefs, data, split_idx, |a, b| {a - b});
-    self.loss = self.mse(split_idx);
+    self.score = self.compute(split_idx);
   }
 
   /// Fast MSE computation. O(1)
-  pub fn mse(&self, split_idx: usize) -> dtype {
+  fn compute(&self, split_idx: usize) -> dtype {
     let left_len = split_idx as dtype;
     let left_mse = MSE::part_mse(left_len, &self.left_coefs);
     let right_len = (self.data_len - split_idx) as dtype;
@@ -48,8 +45,13 @@ impl MSE {
 /// Private methods of MSE structure
 impl MSE {
 
+  fn init_coefs(&mut self, data: &[Vec<dtype>], split_idx: usize) {
+    self.left_coefs = MSE::coefs(&data[0..split_idx]);
+    self.right_coefs = MSE::coefs(&data[split_idx..self.data_len]);
+  }
+
   fn update_coefs<F: Fn(dtype, dtype) -> dtype>(coefs: &mut (dtype, dtype),
-    data: &Vec<Vec<dtype>>, split_idx: usize, op: F) {
+    data: &[Vec<dtype>], split_idx: usize, op: F) {
     let split_by: usize = split_idx - 1;
     coefs.0 = op(coefs.0, data[split_by][0] * data[split_by][0]);
     coefs.1 = op(coefs.1, data[split_by][0]);

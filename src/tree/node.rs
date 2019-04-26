@@ -1,4 +1,5 @@
 use super::super::types::*;
+use super::super::loss::mse::MSE;
 
 #[derive(Debug)]
 pub enum NodeType {
@@ -15,7 +16,8 @@ pub struct Node {
   pub score: dtype,
   pub cl_count: Option<Vec<usize>>,
   pub lchild: Option<Box<Node>>,
-  pub rchild: Option<Box<Node>>
+  pub rchild: Option<Box<Node>>,
+  pub loss: Option<MSE>
 }
 
 impl Node {
@@ -24,7 +26,8 @@ impl Node {
     Node {
       samples: 0, depth: 0, ntype: ntype,
       score: 0., fs_idx: None, fs_val: None,
-      lchild: None, rchild: None, cl_count: None
+      lchild: None, rchild: None, cl_count: None,
+      loss: None
     }
   }
 

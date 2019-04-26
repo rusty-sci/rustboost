@@ -5,7 +5,7 @@ use std::rc::Rc;
 use std::cell::RefCell;
 
 use super::dataset::Dataset;
-use super::config::{LearningTask, DEFAULT_OBJECTIVE};
+use super::config::{LearningTask, DEFAULT_LT};
 use self::node::*;
 
 #[derive(Debug)]
@@ -20,8 +20,10 @@ pub struct Tree {
 impl Tree {
 
   pub fn new(dataset: Rc<RefCell<Dataset>>) -> Self {
-    let learning_task = LearningTask::new(DEFAULT_OBJECTIVE
-      .split(":").collect::<Vec<&str>>()[0]);
+    let learning_task = LearningTask::new(DEFAULT_LT);
+    // let root: Node = Node::new(NodeType::Root)
+    //   .samples(dataset.borrow().size)
+    //   .depth(0);
     Tree {
       root: None,
       dataset: dataset,
