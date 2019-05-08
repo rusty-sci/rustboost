@@ -11,7 +11,7 @@ rand = "0.5.5"
 num = "0.2.0"
 env_logger = "0.6.1"
 log = "0.4"
-libsvm_parser = { path = "/Users/Alexander/Develop/rusty-sci/libsvm-parser", version = "0.1.1" }
+libsvm_parser = { path = "../libsvm-parser", version = "0.1.1" }
 
 [dev-dependencies]
 pretty_assertions = "0.4.0"

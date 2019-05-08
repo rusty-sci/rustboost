@@ -1,6 +1,10 @@
 use super::super::types::dtype;
 
 /// MSE for binary tree regression.
+/// score: total loss (left part + right part) of the node.
+/// Computes at initialization and after each update() function call.
+/// left_coefs: (squared_sum, sum) of the left split.
+/// right_coefs: (squared_sum, sum) of the right split.
 #[derive(Debug)]
 #[derive(Copy, Clone)]
 pub struct MSE {
@@ -10,6 +14,7 @@ pub struct MSE {
   right_coefs: (dtype, dtype)
 }
 
+/// MSE structure methods.
 impl MSE {
 
   pub fn new(data: &[Vec<dtype>], split_idx: usize) -> Self {
@@ -47,6 +52,7 @@ impl MSE {
       MSE::part_mse((self.data_len - split_idx) as dtype, &self.right_coefs);
   }
 
+  /// Update left and right coefs for fast MSE computation after sliding of split's border.
   fn update_coefs<F: Fn(dtype, dtype) -> dtype>(coefs: &mut (dtype, dtype),
     data: &[Vec<dtype>], split_idx: usize, op: F) {
     coefs.0 = op(coefs.0, data[split_idx - 1][0] * data[split_idx - 1][0]);

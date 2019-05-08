@@ -2,20 +2,27 @@ use std::collections::HashSet;
 use super::super::types::dtype;
 
 #[derive(Debug)]
-#[derive(Copy, Clone)]
+// #[derive(Copy, Clone)]
 pub struct Gini {
-  pub score: dtype
+  pub score: dtype,
+  data_len: usize,
+  left_classes_count: Vec<usize>,
+  right_classes_count: Vec<usize>
 }
 
 impl Gini {
-  pub fn new(data: &[Vec<dtype>]) -> Self {
+  pub fn new(data: &[Vec<dtype>], classes: &HashSet<usize>) -> Self {
+    let (score, right_classes_count) = Gini::impurity(data, classes, data.len());
     Self {
-      score: 0.
+      score: score,
+      data_len: data.len(),
+      left_classes_count: vec![0; classes.len()],
+      right_classes_count: right_classes_count
     }
   }
 
-  fn gini_impurity(&self, data: &[Vec<dtype>],
-    classes: &HashSet<usize>, size: usize) -> (dtype, Vec<usize>) {
+  fn impurity(data: &[Vec<dtype>], classes: &HashSet<usize>,
+    data_len: usize) -> (dtype, Vec<usize>) {
     let mut score: dtype = 0.;
     let mut class_count: Vec<usize> = vec![0; classes.len()];
 
@@ -30,11 +37,17 @@ impl Gini {
       }
 
       class_count[*class as usize] = proportion as usize;
-      proportion /= size as dtype;
+      proportion /= data_len as dtype;
       score += proportion * proportion;
     }
 
     ((1. - score), class_count)
+  }
+
+  #[cfg(test)]
+  pub fn impurity_score(data: &[Vec<dtype>], classes: &HashSet<usize>,
+    data_len: usize) -> (dtype, Vec<usize>) {
+      return Gini::impurity(data, classes, data_len);
   }
 
 }
