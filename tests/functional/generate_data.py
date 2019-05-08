@@ -1,6 +1,4 @@
-import sys
 from termcolor import colored, cprint
-import numpy as np
 import argparse
 import os
 from sklearn.datasets import make_regression

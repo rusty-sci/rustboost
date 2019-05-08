@@ -2,6 +2,7 @@ use super::super::types::*;
 use super::super::loss::mse::MSE;
 
 #[derive(Debug)]
+#[derive(PartialEq)]
 pub enum NodeType {
   Root, Decision, Leaf 
 }

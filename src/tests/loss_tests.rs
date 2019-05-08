@@ -1,11 +1,9 @@
 extern crate rand;
 
 use rand::Rng;
-use pretty_assertions::{assert_eq};
 use super::super::loss::mse::MSE;
 use super::super::types::*;
-
-const EPS: f64 = 10_000_0000f64;
+use super::super::utils::{almost_eq, EPS};
 
 fn gen_data(n: usize, m: usize) -> Vec<Vec<dtype>> {
   const MIN: dtype = 10.;
@@ -35,11 +33,6 @@ fn mse(data: &[Vec<dtype>]) -> dtype {
   return mse / data.len() as dtype;
 }
 
-fn almost_eq(v1: dtype, v2: dtype, eps: dtype) {
-  assert_eq!((v1 * eps).round() / eps,
-    (v2 * eps).round() / eps);
-}
-
 #[test]
 fn test_mse() {
   // let data = vec![vec![0.0, 5.1, 3.5, 1.4, 0.2],
@@ -51,7 +44,7 @@ fn test_mse() {
   let data: Vec<Vec<dtype>> = gen_data(100, 4);
   let mse_test = mse(&data);
   let mse_res = MSE::new(&data, 0).score;
-  almost_eq(mse_test, mse_res, EPS);
+  almost_eq(mse_res, mse_test, EPS);
 }
 
 #[test]

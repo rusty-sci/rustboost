@@ -45,5 +45,5 @@ pub fn run(path: &str, config: Config) {
     .max_tree_depth(2);
   debug!("{:#?}", tree);
   debug!("Fitting!");
-  tree.fit();
+  // tree.fit();
 }

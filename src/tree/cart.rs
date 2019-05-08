@@ -15,6 +15,7 @@ use super::node::{Node, NodeType};
 use super::super::types::*;
 use super::super::config::{LearningTask};
 use super::super::loss::mse::MSE;
+use super::super::utils::{almost_eq, EPS};
 
 impl Tree {
 
@@ -24,9 +25,9 @@ impl Tree {
       .samples(samples)
       .depth(0);
     let data_dim: usize = self.dataset.borrow().data_dim;
-
     let data = &mut (*self.dataset.borrow_mut().data)[..];
-    self.find_best_split(&mut root, data, data_dim);
+    self.grow_tree(&mut root, data, data_dim);
+    // self.find_best_split(&mut root, data, data_dim);
 
 
 
@@ -57,37 +58,45 @@ impl Tree {
     debug!("{:#?}", root);
   }
 
-  fn find_best_split(&self, node: &mut Node, data: &mut [Vec<dtype>], data_dim: usize) {
+  fn grow_tree(&self, node: &mut Node, data: &mut [Vec<dtype>], data_dim: usize) {
+    // let is_finish: bool = node.score == 0. || node.depth == self.max_tree_depth;
+    let is_root: bool = node.ntype == NodeType::Root;
+    // println!("{:?}", is_finish);
+    // if is_finish && !is_root {
+    //   // node.to_leaf();
+    //   return;
+    // }
+    let mut lchild: Node = Node::new(NodeType::Decision)
+      .depth(node.depth + 1);
+    let mut rchild: Node = Node::new(NodeType::Decision)
+      .depth(node.depth + 1);
+
+    // let mut best_f_idx: usize = 0;
+    // let mut best_s_idx: usize = 0;
+
+    
+
     let mut score: dtype = MAX;
     let mut best_f_idx: usize = 0;
     let mut best_s_idx: usize = 0;
     let mut best_loss: Option<MSE> = None;
     for feature_idx in 1..data_dim {
-      // sort data by feature,
-      // 0 index cresponds to the target
-      data.sort_unstable_by(|a, b| {
-        match b[feature_idx].partial_cmp(&a[feature_idx]).unwrap() {
-          Ordering::Equal => b[0].partial_cmp(&a[0]).unwrap(),
-          other => other
-        }
-      });
+      Tree::sort_data_by_feature(data, feature_idx);
       let new_loss = MSE::new(data, 0);
-      if node.loss.is_some() {
-        assert_eq!(node.score, new_loss.score,
-          "new score and prev score must be equal.");
+      // println!("{:#?}", new_loss);
+      if node.loss.is_none() {
+        node.score = new_loss.score;
+        if (node.score == 0. || node.depth == self.max_tree_depth)
+          && !is_root  {
+          return;
+        }
       }
-      node.score = new_loss.score;
+      almost_eq(node.score, new_loss.score, EPS);
       node.loss = Some(new_loss);
-      
-      // assert_eq!(loss.loss, new_loss.loss,
-      //   "new score and prev score must be equal.");
       for split_idx in 1..data.len() {
         node.loss.as_mut().unwrap().update(data, split_idx);
-        let new_score = node.loss.unwrap().score;
-        // println!("{:?}", node.loss.unwrap());
-        // node.loss.unwrap().compute(split_idx);
-        if new_score < score {
-          score = new_score;
+        if node.loss.unwrap().score < score {
+          score = node.loss.unwrap().score;
           best_f_idx = feature_idx;
           best_s_idx = split_idx;
           best_loss = Some(node.loss.unwrap());
@@ -95,38 +104,66 @@ impl Tree {
       }
     }
     node.loss = best_loss;
-    println!("{:?}", score);
-    println!("{:?}", node.loss.unwrap().score);
-    assert_eq!(score, node.loss.unwrap().score);
-    println!("{:?}", score);
-    println!("{:?}", node.loss.unwrap().score);
+
+    node.fs_idx = Some(best_f_idx);
+    lchild.samples = *(&data[0..best_s_idx].len());
+    rchild.samples = *(&data[best_s_idx..node.samples].len());
+    node.lchild = Some(Box::new(lchild));
+    node.rchild = Some(Box::new(rchild));
+
+    Tree::sort_data_by_feature(data, best_f_idx);
+
+    self.grow_tree(node.lchild.as_mut().unwrap(),
+      &mut data[0..best_s_idx], data_dim);
+    self.grow_tree(node.rchild.as_mut().unwrap(),
+      &mut data[best_s_idx..node.samples], data_dim);
+  }
+
+  fn sort_data_by_feature(data: &mut [Vec<dtype>], feature: usize) {
+    data.sort_unstable_by(|a, b| {
+      match b[feature].partial_cmp(&a[feature]).unwrap() {
+        Ordering::Equal => b[0].partial_cmp(&a[0]).unwrap(),
+        other => other
+      }
+    });
   }
 
 
 
-  fn grow_tree(&self, node: &mut Node, data: &mut [Vec<dtype>], data_dim: usize) {
-    // let mut score: dtype = MAX;
 
-    // let mut lchild: Node = Node::new(NodeType::Decision)
-    //   .depth(node.depth + 1);
-    // let mut rchild: Node = Node::new(NodeType::Decision)
-    //   .depth(node.depth + 1);
 
-    // for feature_idx in 1..data_dim {
-    //   // sort data by feature, 0 index cresponds to
-    //   // target
-    //   data.sort_unstable_by(|a, b| {
-    //     match b[feature_idx].partial_cmp(&a[feature_idx]).unwrap() {
-    //       Ordering::Equal => b[0].partial_cmp(&a[0]).unwrap(),
-    //       other => other
-    //     }
-    //   });
 
-    //   for split_idx in 1..data.len() {
 
-    //   }
-    // }
-  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   // fn grow_cart_reg(&self, node: &mut Node<DType>, data: &mut [(TargetType, Vec<DType>)],
   //   data_dim: usize) {

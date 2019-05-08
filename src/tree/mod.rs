@@ -21,9 +21,6 @@ impl Tree {
 
   pub fn new(dataset: Rc<RefCell<Dataset>>) -> Self {
     let learning_task = LearningTask::new(DEFAULT_LT);
-    // let root: Node = Node::new(NodeType::Root)
-    //   .samples(dataset.borrow().size)
-    //   .depth(0);
     Tree {
       root: None,
       dataset: dataset,

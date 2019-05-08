@@ -11,6 +11,7 @@ pub mod config;
 mod dataset;
 mod types;
 mod loss;
+mod utils;
 
 #[cfg(test)]
 mod tests {
