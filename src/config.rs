@@ -95,6 +95,7 @@ impl Config {
     }
   }
 
+
   pub fn task(self, task: &str) -> Self {
     Config {
       task: Task::new(task),
@@ -102,12 +103,14 @@ impl Config {
     }
   }
 
+
   pub fn model(self, model: &str) -> Self {
     Config {
       model: Model::new(model),
       ..self
     }
   }
+
 
   pub fn learning_task(self, learning_task: &str) -> Self {
     Config {

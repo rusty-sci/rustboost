@@ -1,5 +1,5 @@
 use super::super::types::*;
-use super::super::loss::mse::MSE;
+use super::super::loss::Loss;
 
 #[derive(Debug)]
 #[derive(PartialEq)]
@@ -10,15 +10,15 @@ pub enum NodeType {
 #[derive(Debug)]
 pub struct Node {
   pub samples: usize,
-  pub fs_idx: Option<usize>,
-  pub fs_val: Option<dtype>,
+  pub feature: Option<usize>,
+  pub feature_value: Option<dtype>,
   pub depth: usize,
   pub ntype: NodeType,
   pub score: dtype,
-  pub cl_count: Option<Vec<usize>>,
+  pub classes_count: Option<Vec<usize>>,
   pub lchild: Option<Box<Node>>,
   pub rchild: Option<Box<Node>>,
-  pub loss: Option<MSE>
+  pub loss: Option<Box<Loss>>
 }
 
 impl Node {
@@ -26,11 +26,12 @@ impl Node {
   pub fn new(ntype: NodeType) -> Self {
     Node {
       samples: 0, depth: 0, ntype: ntype,
-      score: 0., fs_idx: None, fs_val: None,
-      lchild: None, rchild: None, cl_count: None,
+      score: 0., feature: None, feature_value: None,
+      lchild: None, rchild: None, classes_count: None,
       loss: None
     }
   }
+
 
   pub fn samples(self, samples: usize) -> Self {
     Self {
@@ -39,6 +40,7 @@ impl Node {
     }
   }
 
+
   pub fn depth(self, depth: usize) -> Self {
     Self {
       depth,
@@ -46,12 +48,9 @@ impl Node {
     }
   }
 
+
+  pub fn to_leaf(&mut self) {
+    self.ntype = NodeType::Leaf;
+  }
+
 }
-
-
-// impl<DType> Node<DType>
-//   where DType: Copy + FromStr + ToPrimitive + Num + FromPrimitive + Float + Debug {
-//   pub fn to_leaf(&mut self) {
-//     self.ntype = NodeType::Leaf;
-//   }
-// }

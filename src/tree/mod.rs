@@ -2,16 +2,14 @@ pub mod node;
 pub mod cart;
 
 use std::rc::Rc;
-use std::cell::RefCell;
 
 use super::dataset::Dataset;
 use super::config::{LearningTask, DEFAULT_LT};
 use self::node::*;
 
-#[derive(Debug)]
 pub struct Tree {
   pub root: Option<Node>,
-  pub dataset: Rc<RefCell<Dataset>>,
+  pub dataset: Rc<Dataset>,
   pub max_tree_depth: usize,
   pub min_node_samples: usize,
   pub learning_task: LearningTask
@@ -19,7 +17,7 @@ pub struct Tree {
 
 impl Tree {
 
-  pub fn new(dataset: Rc<RefCell<Dataset>>) -> Self {
+  pub fn new(dataset: Rc<Dataset>) -> Self {
     let learning_task = LearningTask::new(DEFAULT_LT);
     Tree {
       root: None,
@@ -30,6 +28,7 @@ impl Tree {
     }
   }
 
+
   pub fn max_tree_depth(self, max_tree_depth: usize) -> Self {
     Self {
       max_tree_depth,
@@ -37,12 +36,14 @@ impl Tree {
     }
   }
 
+
   pub fn min_node_samples(self, min_node_samples: usize) -> Self {
     Self {
       min_node_samples,
       ..self
     }
   }
+
 
   pub fn learning_task(self, learning_task: LearningTask) -> Self {
     Self {
@@ -60,4 +61,13 @@ impl Tree {
     self.cart();
   }
 
+}
+
+impl std::fmt::Debug for Tree {
+  fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    write!(f, "Tree {{ max_tree_depth: {}, \
+    min_node_samples: {:?}, learning_task: {:#?}, root: {:#?} }}",
+    self.max_tree_depth, self.min_node_samples,
+    self.learning_task, self.root)
+  }
 }

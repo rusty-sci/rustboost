@@ -1,6 +1,5 @@
 // use std::time::{Duration, Instant};
 use std::rc::Rc;
-use std::cell::RefCell;
 
 use super::config::*;
 use super::dataset::Dataset;
@@ -37,7 +36,7 @@ pub fn run(path: &str, config: Config) {
       dataset = Dataset::from_libsvm(path, true);
     }
   }
-  let dataset = Rc::new(RefCell::new(dataset));
+  let dataset = Rc::new(dataset);
   // debug!("{:#?}", dataset);
   let mut tree = Tree::new(Rc::clone(&dataset))
     .learning_task(config.learning_task)
@@ -45,5 +44,6 @@ pub fn run(path: &str, config: Config) {
     .max_tree_depth(2);
   debug!("{:#?}", tree);
   debug!("Fitting!");
-  // tree.fit();
+  tree.fit();
+  debug!("{:#?}", tree);
 }
